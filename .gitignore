@@ -1,0 +1,15 @@
+# Node dependencies
+node_modules/
+npm-debug.log
+build/
+
+# Python environment & cache
+__pycache__/
+*.pyc
+.env
+venv/
+.pytest_cache/
+
+# Docker & OS
+.DS_Store
+*.db

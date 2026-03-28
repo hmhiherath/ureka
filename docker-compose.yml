@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # --- Database Service ---
+  db:
+    image: postgres:15
+    container_name: triage_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: triage_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # --- Python Backend ---
+  backend:
+    build: ./backend
+    container_name: triage_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      # We use 'db' as the hostname because Docker links them by service name
+      SQLALCHEMY_DATABASE_URI: postgresql://user:password@db:5432/triage_db
+    ports:
+      - "5000:5000"
+
+  # --- React Frontend ---
+  frontend:
+    build: ./frontend
+    container_name: triage_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - WDS_SOCKET_PORT=0 # Fix for Docker/React websocket issues
+    stdin_open: true # Keeps the terminal active
+    tty: true
+
+volumes:
+  postgres_data:

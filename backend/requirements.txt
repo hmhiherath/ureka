@@ -1,0 +1,14 @@
+# --- Web Framework & Real-Time Communications ---
+Flask==3.0.2                # The core Python web server
+Flask-SocketIO==5.3.6       # Enables real-time, bi-directional WebSocket communication
+eventlet==0.35.2            # Asynchronous concurrent networking (makes WebSockets run smoothly)
+
+# --- Database & ORM ---
+Flask-SQLAlchemy==3.1.1     # Maps Python classes to database tables
+psycopg2-binary==2.9.9      # The PostgreSQL database adapter for Python
+
+# --- Data Validation ---
+pydantic==2.6.4             # Strict type-checking and schema validation for incoming patient data
+
+# --- External Worker ---
+requests==2.31.0            # Used by escalation_worker.py to trigger the Webhook API

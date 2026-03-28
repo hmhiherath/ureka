@@ -1,0 +1,441 @@
+/* ==========================================================================
+   1. GLOBAL VARIABLES & RESET
+   ========================================================================== */
+:root {
+  /* Medical Color Palette */
+  --primary-blue: #0056b3;
+  --primary-hover: #004494;
+  --danger-red: #dc3545;
+  --danger-light: #f8d7da;
+  --warning-orange: #fd7e14;
+  --warning-yellow: #ffc107;
+  --success-green: #28a745;
+  
+  /* UI Colors */
+  --bg-admin: #f4f7f6;
+  --bg-sidebar: #1e293b;
+  --bg-card: #ffffff;
+  --text-main: #333333;
+  --text-muted: #6c757d;
+  --border-color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--bg-admin);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   2. ADMIN LAYOUT (Nurse Tablet)
+   ========================================================================== */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background-color: var(--bg-sidebar);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h2 {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.nav-item {
+  padding: 15px 20px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  background-color: rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+.nav-item.active {
+  background-color: var(--primary-blue);
+  color: #fff;
+  border-left: 4px solid #60a5fa;
+}
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.9rem;
+}
+
+.logout-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.top-header {
+  background: #fff;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.status-dot.green {
+  width: 10px;
+  height: 10px;
+  background-color: var(--success-green);
+  border-radius: 50%;
+  box-shadow: 0 0 5px var(--success-green);
+}
+
+.content-wrapper {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ==========================================================================
+   3. PATIENT CARDS & QUEUE
+   ========================================================================== */
+.patient-cards-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.patient-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-left: 6px solid var(--border-color); /* Default */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Priority Color Coding */
+.card-critical { border-left-color: var(--danger-red); }
+.card-warning { border-left-color: var(--warning-orange); }
+.card-urgent-escalated { 
+  border-left-color: var(--warning-yellow);
+  background-color: #fffdf5;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.patient-id {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.patient-name {
+  font-size: 1.4rem;
+  margin: 5px 0;
+}
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  background: var(--bg-admin);
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.vital-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.vital-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.vital-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.text-danger { color: var(--danger-red); }
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.action-btn {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.action-btn:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+.action-btn:disabled {
+  background-color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   4. SEVERITY BADGES
+   ========================================================================== */
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-standard { background: #e2e8f0; color: #475569; }
+.badge-urgent { background: #ffedd5; color: #c2410c; }
+.badge-critical { background: #fee2e2; color: #b91c1c; }
+.badge-escalated { background: #fef9c3; color: #854d0e; border: 1px solid #facc15; }
+
+/* ==========================================================================
+   5. TRIAGE FORM (Inputs)
+   ========================================================================== */
+.triage-form {
+  background: var(--bg-card);
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-section {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.form-section legend {
+  font-weight: bold;
+  color: var(--primary-blue);
+  padding: 0 10px;
+}
+
+.input-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width { width: 100%; }
+
+.input-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.input-group input, .input-group select {
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(0,86,179,0.1);
+}
+
+/* ==========================================================================
+   6. PUBLIC MONITOR (Kiosk Dark Mode)
+   ========================================================================== */
+.dark-theme {
+  background-color: #0f172a;
+  color: #f8fafc;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.monitor-header {
+  padding: 30px 50px;
+  background-color: #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid var(--primary-blue);
+}
+
+.monitor-header h1 { font-size: 3rem; margin: 0; color: #fff; }
+.monitor-header h2 { font-size: 1.5rem; color: #94a3b8; font-weight: 400; }
+
+.monitor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.8rem; /* Huge text for distance reading */
+}
+
+.monitor-table th {
+  background: #334155;
+  padding: 20px;
+  text-align: left;
+  color: #cbd5e1;
+}
+
+.monitor-row td {
+  padding: 25px 20px;
+  border-bottom: 1px solid #334155;
+}
+
+.next-patient-row {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-left: 8px solid var(--success-green);
+}
+
+.status-calling {
+  color: #4ade80;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+.blink-animation {
+  animation: pulseBg 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes pulseBg {
+  0% { background-color: #854d0e; }
+  50% { background-color: #ca8a04; }
+  100% { background-color: #854d0e; }
+}
+
+/* ==========================================================================
+   7. PRINT MEDIA QUERY (For ShiftReport.jsx)
+   ========================================================================== */
+@media print {
+  /* Hide the sidebar and browser UI */
+  .sidebar, .top-header, .no-print {
+    display: none !important;
+  }
+
+  /* Reset layout constraints so the table takes the full page */
+  .admin-layout, .main-content, .content-wrapper {
+    height: auto;
+    overflow: visible;
+    display: block;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Ensure background colors print correctly */
+  body {
+    background-color: white;
+    color: black;
+  }
+
+  .shift-report-container {
+    padding: 20px;
+  }
+
+  /* Add simple borders for the paper table */
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  .report-table th, .report-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+  }
+
+  /* Force page breaks if the list is huge */
+  .report-table tr {
+    page-break-inside: avoid;
+  }
+}

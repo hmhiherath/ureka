@@ -71,17 +71,13 @@ class TriageHeap:
     def escalate_priorities(self, threshold_seconds=1800, score_bump=5.0):
         """
         Scans the heap for patients who have waited longer than the threshold.
-        Increases their priority score to ensure they don't wait forever.
-        
-        :param threshold_seconds: How long before a patient gets bumped (e.g., 1800s = 30 mins)
-        :param score_bump: How much to increase the ATSS score by.
-        :return: Boolean indicating if any changes were made.
+        Returns a list of patient_ids that were escalated.
         """
         if not self.heap:
-            return False
+            return []
 
         now = time.time()
-        updated = False
+        escalated_ids = []
 
         # Iterate through the underlying array
         for i in range(len(self.heap)):
@@ -91,18 +87,14 @@ class TriageHeap:
             
             if wait_time > threshold_seconds:
                 # Patient has waited too long! 
-                # To increase the score, we subtract from the negative value
                 new_neg_score = neg_score - score_bump
-                
-                # Update the tuple in the array
                 self.heap[i] = (new_neg_score, arrival_timestamp, patient_id)
-                updated = True
+                escalated_ids.append(patient_id)
                 
                 logger.info(f"Escalated Patient {patient_id}. Wait time: {int(wait_time/60)} mins.")
 
-        if updated:
-            # If we changed values, the heap property might be violated.
-            # We must re-balance the entire tree. O(n) operation.
+        if escalated_ids:
+            # Re-balance the entire tree only if changes were made
             heapq.heapify(self.heap)
 
-        return updated
+        return escalated_ids

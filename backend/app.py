@@ -43,6 +43,30 @@ def trigger_escalation():
         return jsonify({"error": "Unauthorized"}), 401
 
     try:
+        # Now returns a list of specific IDs
+        escalated_ids = triage_heap.escalate_priorities(threshold_seconds=1800) 
+        
+        if escalated_ids:
+            logger.info(f"📢 Escalation applied to patients: {escalated_ids}")
+            for pid in escalated_ids:
+                patient = Patient.query.get(pid)
+                if patient:
+                    patient.escalated = True 
+            db.session.commit()
+            broadcast_queue()
+            return jsonify({"message": f"Escalated {len(escalated_ids)} patients"}), 200
+            
+        return jsonify({"message": "No patients required escalation"}), 200
+    except Exception as e:
+        logger.error(f"❌ Escalation API Error: {str(e)}")
+        db.session.rollback()
+        return jsonify({"error": "Internal Server Error"}), 500
+    """Triggered by escalation_worker.py to update priority based on wait time."""
+    auth_header = request.headers.get('Authorization')
+    if auth_header != f"Bearer {WORKER_SECRET}":
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
         updated = triage_heap.escalate_priorities(threshold_seconds=1800) # 30 mins
         if updated:
             logger.info("📢 Escalation applied via external trigger.")
@@ -90,8 +114,55 @@ def handle_connect():
     logger.info(f"🔌 Client connected: {request.sid}")
     send_queue_to_client(request.sid)
 
+from datetime import datetime
+
 @socketio.on('new_patient')
 def handle_new_patient(raw_data):
+    try:
+        validated_data = PatientCreate(**raw_data)
+        
+        score = calculate_base_severity(
+            age=validated_data.age,
+            pain_level=validated_data.pain_level,
+            vitals=validated_data.vitals.model_dump(),
+            symptoms=validated_data.symptoms,
+            conditions=validated_data.conditions
+        )
+        
+        # 1. Define time in Python to avoid DB sync delays
+        current_time = datetime.utcnow()
+        
+        new_patient = Patient(
+            name=validated_data.name,
+            age=validated_data.age,
+            gender=validated_data.gender,
+            symptoms=", ".join(validated_data.symptoms),
+            conditions=", ".join(validated_data.conditions) if validated_data.conditions else None,
+            heart_rate=validated_data.vitals.hr,
+            sbp=validated_data.vitals.sbp,
+            dbp=validated_data.vitals.dbp,
+            temp=validated_data.vitals.temp,
+            pain_level=validated_data.pain_level,
+            severity_score=score,
+            arrival_time=current_time, # <--- 2. Inject it explicitly
+            status="Waiting"
+        )
+        
+        db.session.add(new_patient)
+        db.session.commit()
+        
+        # 3. Use the Python variable instead of new_patient.arrival_time
+        triage_heap.insert(new_patient.id, score, current_time)
+        logger.info(f"🆕 Patient {new_patient.id} added. Score: {score}")
+        
+        broadcast_queue()
+
+    except ValidationError as e:
+        logger.error(f"❌ Schema Validation Error: {e.json()}")
+        emit('error', {'message': 'Invalid data formats.'})
+    except Exception as e:
+        logger.error(f"❌ Error adding patient: {str(e)}")
+        db.session.rollback()
     global patient_id_counter
     try:
         # Validate data against Pydantic schema
@@ -175,31 +246,35 @@ def send_queue_to_client(sid):
     emit('update_queue', {'queue': queue_data, 'total_waiting': len(ordered_ids)}, room=sid)
 
 def build_queue_payload(ordered_ids):
-    """Maps dictionary objects to JSON-serializable structures."""
+    """Maps database objects to JSON-serializable dictionaries."""
     now = time.time()
+    if not ordered_ids:
+        return []
+        
+    # Fetch all waiting patients in ONE fast query
+    patients = Patient.query.filter(Patient.id.in_(ordered_ids)).all()
+    # Map them by ID for instant O(1) lookups
+    patient_map = {p.id: p for p in patients}
+    
     payload = []
     for pid in ordered_ids:
-        p = patients_db.get(pid)
+        p = patient_map.get(pid)
         if not p: continue
         
-        wait_time = int((now - p["arrival_time"].timestamp()) / 60)
+        wait_time = int((now - p.arrival_time.timestamp()) / 60)
         payload.append({
-            "id": p["id"],
-            "name": p["name"],
-            "age": p["age"],
-            "gender": p["gender"],
-            "symptoms": [s.strip() for s in p["symptoms"].split(',')] if p["symptoms"] else [],
-            "conditions": [c.strip() for c in p["conditions"].split(',')] if p["conditions"] else [],
-            "vitals": {"hr": p["heart_rate"], "sbp": p["sbp"], "dbp": p["dbp"], "temp": p["temp"]},
-            "pain_level": p["pain_level"],
-            "arrival_time": p["arrival_time"].isoformat(),
-            "severity_score": p["severity_score"],
-            "status": p["status"],
-            "escalated": p["escalated"],
+            "id": p.id,
+            "name": p.name,
+            "age": p.age,
+            "gender": p.gender,
+            "symptoms": [s.strip() for s in p.symptoms.split(',')] if p.symptoms else [],
+            "conditions": [c.strip() for c in p.conditions.split(',')] if p.conditions else [],
+            "vitals": {"hr": p.heart_rate, "sbp": p.sbp, "dbp": p.dbp, "temp": p.temp},
+            "pain_level": p.pain_level,
+            "arrival_time": p.arrival_time.isoformat(),
+            "severity_score": p.severity_score,
+            "status": p.status,
+            "escalated": p.escalated,
             "wait_time_mins": wait_time
         })
     return payload
-
-if __name__ == '__main__':
-    # host='0.0.0.0' is required for Docker visibility
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)

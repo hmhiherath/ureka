@@ -73,20 +73,24 @@ const Dashboard = () => {
         minHeight: 0 // Crucial CSS trick to allow columns to scroll independently
       }}>
         
-        {/* LEFT: Intake Form (Using glass-panel class from App.css) */}
-        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* LEFT: Intake Form - Added visible border */}
+        <div className="glass-panel" style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          overflow: 'hidden',
+          border: '1px solid rgba(255, 255, 255, 0.15)' 
+        }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <TriageForm socket={socket} disabled={!isConnected} />
           </div>
         </div>
 
-        {/* CENTER: Action Queue (The Max-Heap) */}
-        {/* We add a subtle blue border to the center panel to make it the focal point */}
+        {/* CENTER: Action Queue (The Max-Heap) - Enhanced focal border */}
         <div className="glass-panel" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(56, 189, 248, 0.2)',
+          border: '1px solid rgba(56, 189, 248, 0.4)',
           boxShadow: '0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.02)'
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
@@ -94,8 +98,13 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* RIGHT: Local History Report */}
-        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* RIGHT: Local History Report - Added visible border */}
+        <div className="glass-panel" style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          overflow: 'hidden',
+          border: '1px solid rgba(255, 255, 255, 0.15)'
+        }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <ShiftReport socket={socket} />
           </div>

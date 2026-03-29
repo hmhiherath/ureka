@@ -1,16 +1,13 @@
 version: '3.8'
 
 services:
-  # --- Python Backend ---
   backend:
     build: ./backend
     container_name: triage_backend
     restart: always
-    # 'depends_on' and 'SQLALCHEMY_DATABASE_URI' have been removed
     ports:
       - "5000:5000"
 
-  # --- React Frontend ---
   frontend:
     build: ./frontend
     container_name: triage_frontend
@@ -18,8 +15,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - WDS_SOCKET_PORT=0 # Fix for Docker/React websocket issues
-    stdin_open: true # Keeps the terminal active
+      - WDS_SOCKET_PORT=0
+      - REACT_APP_BACKEND_URL=http://localhost:5000 # Critical for the useSocket hook
+    stdin_open: true
     tty: true
-
-# The 'volumes' block for postgres_data has been completely removed

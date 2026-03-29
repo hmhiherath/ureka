@@ -1,49 +1,73 @@
 import React from 'react';
-import PatientCard from '../components/PatientCard'; // Assuming you have this visual component
+import PatientCard from '../components/PatientCard';
 
 const PatientQueue = ({ queue, socket, disabled }) => {
   
   const handleTreatNext = () => {
     if (!disabled && socket) {
-      // Emit event to pop the highest priority patient off the backend Max-Heap
       socket.emit('treat_next');
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', opacity: disabled ? 0.7 : 1, transition: 'opacity 0.3s' }}>
       {/* Action Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ margin: 0, color: '#0f172a' }}>Live Queue (Max-Heap)</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div>
+          <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '20px', fontWeight: '800' }}>Live Queue</h3>
+          <p style={{ fontSize: '13px', color: '#38bdf8', marginTop: '4px', fontWeight: '600', letterSpacing: '0.5px' }}>MAX-HEAP ALGORITHM ACTIVE</p>
+        </div>
         
+        {/* Glowing Treat Action Button */}
         <button 
           onClick={handleTreatNext}
           disabled={disabled || queue.length === 0}
           style={{
-            padding: '10px 24px',
-            background: (disabled || queue.length === 0) ? '#cbd5e1' : '#10b981',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            fontWeight: 'bold',
+            padding: '12px 24px',
+            background: (disabled || queue.length === 0) ? 'rgba(255,255,255,0.05)' : 'linear-gradient(90deg, #059669, #10b981)',
+            color: (disabled || queue.length === 0) ? '#64748b' : '#fff',
+            border: (disabled || queue.length === 0) ? '1px solid rgba(255,255,255,0.1)' : 'none',
+            borderRadius: '8px',
+            fontWeight: '800',
+            fontSize: '13px',
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
             cursor: (disabled || queue.length === 0) ? 'not-allowed' : 'pointer',
-            boxShadow: (disabled || queue.length === 0) ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)'
+            boxShadow: (disabled || queue.length === 0) ? 'none' : '0 4px 20px rgba(16, 185, 129, 0.4)',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
+          onMouseOver={(e) => !(disabled || queue.length === 0) && (e.currentTarget.style.transform = 'translateY(-2px)')}
+          onMouseOut={(e) => !(disabled || queue.length === 0) && (e.currentTarget.style.transform = 'translateY(0)')}
         >
-          👨‍⚕️ TREAT NEXT PATIENT
+          <span style={{ fontSize: '16px' }}>⚕️</span> TREAT NEXT
         </button>
       </div>
 
-      {/* Queue List */}
+      {/* Queue List / Empty State */}
       {queue.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', background: '#fff', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-          <p style={{ fontSize: '18px', margin: '0 0 10px 0' }}>Queue is Empty</p>
-          <small>Waiting for new patient intake...</small>
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '60px 20px', 
+          color: '#64748b', 
+          background: 'rgba(0, 0, 0, 0.2)', 
+          borderRadius: '16px', 
+          border: '1px dashed rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1
+        }}>
+          <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.5 }}>🩺</div>
+          <p style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: '700', color: '#94a3b8' }}>Queue is Empty</p>
+          <small style={{ fontSize: '13px' }}>Awaiting incoming patient telemetry...</small>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '20px' }}>
           {queue.map((patient, index) => (
-            // We pass rank=index+1 so the UI shows who is 1st, 2nd, etc.
             <PatientCard key={patient.id} patient={patient} rank={index + 1} />
           ))}
         </div>

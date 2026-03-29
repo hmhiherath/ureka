@@ -6,20 +6,12 @@ import TriageForm from './TriageForm';
 import PatientQueue from './PatientQueue';
 import ShiftReport from './ShiftReport';
 
-const Dashboard = () => {
-  // 1. Hook into our global WebSocket state
-  const { socket, isConnected, queue, totalWaiting } = useSocket();
+// Ensure the global CSS is imported so we can use the glass-panel class
+import '../App.css'; 
 
-  // 2. Common styles for our scrollable columns
-  const columnStyle = {
-    background: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden', // Contain the inner scroll
-    border: '1px solid #e2e8f0'
-  };
+const Dashboard = () => {
+  // Hook into our global WebSocket state
+  const { socket, isConnected, queue, totalWaiting } = useSocket();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -29,42 +21,45 @@ const Dashboard = () => {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '20px',
+        marginBottom: '24px',
         padding: '0 8px'
       }}>
         <div>
-          <h2 style={{ margin: 0, color: '#0f172a', fontSize: '24px', fontWeight: '800' }}>
+          <h2 style={{ margin: 0, color: '#f8fafc', fontSize: '28px', fontWeight: '900', letterSpacing: '-0.5px' }}>
             Active Triage Sector
           </h2>
-          <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '14px' }}>
-            Total Patients Waiting: <strong style={{ color: '#0f172a' }}>{totalWaiting}</strong>
+          <p style={{ margin: '6px 0 0 0', color: '#94a3b8', fontSize: '14px', fontWeight: '500' }}>
+            Total Patients Waiting: <strong style={{ color: '#38bdf8', fontSize: '16px' }}>{totalWaiting}</strong>
           </p>
         </div>
 
-        {/* Dynamic Connection Badge */}
+        {/* Premium Dark-Mode Connection Badge */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          background: isConnected ? '#ecfdf5' : '#fef2f2',
-          padding: '8px 16px',
-          borderRadius: '20px',
-          border: `1px solid ${isConnected ? '#a7f3d0' : '#fecaca'}`
+          gap: '10px',
+          background: 'rgba(15, 23, 42, 0.6)', // Dark glass
+          backdropFilter: 'blur(10px)',
+          padding: '10px 20px',
+          borderRadius: '30px',
+          border: `1px solid ${isConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+          boxShadow: isConnected ? '0 0 20px rgba(16, 185, 129, 0.1)' : '0 0 20px rgba(239, 68, 68, 0.1)'
         }}>
           <div style={{
             width: '10px',
             height: '10px',
             borderRadius: '50%',
             background: isConnected ? '#10b981' : '#ef4444',
-            boxShadow: isConnected ? '0 0 8px #10b981' : '0 0 8px #ef4444'
+            boxShadow: isConnected ? '0 0 12px #10b981' : '0 0 12px #ef4444',
+            animation: isConnected ? 'pulse-glow 2s infinite' : 'none'
           }}></div>
           <span style={{ 
-            color: isConnected ? '#065f46' : '#991b1b', 
-            fontWeight: '600', 
-            fontSize: '13px',
-            letterSpacing: '0.5px'
+            color: isConnected ? '#10b981' : '#ef4444', 
+            fontWeight: '700', 
+            fontSize: '12px',
+            letterSpacing: '1px'
           }}>
-            {isConnected ? 'SYSTEM ONLINE' : 'CONNECTION LOST'}
+            {isConnected ? 'SYSTEM SECURE' : 'CONNECTION LOST'}
           </span>
         </div>
       </div>
@@ -78,22 +73,29 @@ const Dashboard = () => {
         minHeight: 0 // Crucial CSS trick to allow columns to scroll independently
       }}>
         
-        {/* LEFT: Intake Form */}
-        <div style={columnStyle}>
+        {/* LEFT: Intake Form (Using glass-panel class from App.css) */}
+        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <TriageForm socket={socket} disabled={!isConnected} />
           </div>
         </div>
 
         {/* CENTER: Action Queue (The Max-Heap) */}
-        <div style={{ ...columnStyle, border: '2px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
-          <div style={{ overflowY: 'auto', padding: '24px', height: '100%', background: '#f8fafc' }}>
+        {/* We add a subtle blue border to the center panel to make it the focal point */}
+        <div className="glass-panel" style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          overflow: 'hidden',
+          border: '1px solid rgba(56, 189, 248, 0.2)',
+          boxShadow: '0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.02)'
+        }}>
+          <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <PatientQueue queue={queue} socket={socket} disabled={!isConnected} />
           </div>
         </div>
 
         {/* RIGHT: Local History Report */}
-        <div style={columnStyle}>
+        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <ShiftReport socket={socket} />
           </div>

@@ -43,7 +43,8 @@ const ShiftReport = ({ socket }) => {
       display: 'flex', 
       flexDirection: 'column', 
       height: '100%',
-      padding: '2px' // Subtle inner padding to keep elements away from glass borders
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       {/* --- HEADER SECTION --- */}
       <div style={{ 
@@ -52,9 +53,9 @@ const ShiftReport = ({ socket }) => {
         alignItems: 'center', 
         marginBottom: '24px',
         flexShrink: 0,
-        paddingRight: '4px' // Ensures button doesn't touch the right border
+        padding: '4px 12px 0 4px' 
       }}>
-        <div>
+        <div style={{ flexShrink: 0 }}>
           <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '18px', fontWeight: '900', letterSpacing: '-0.5px' }}>
             Mission Log
           </h3>
@@ -63,30 +64,38 @@ const ShiftReport = ({ socket }) => {
           </span>
         </div>
         
-        {/* Reinforced Purge Button */}
+        {/* CIRCULAR PURGE BUTTON */}
         <button 
           onClick={clearHistory} 
           style={{ 
             background: 'rgba(239, 68, 68, 0.1)', 
-            border: '1.5px solid rgba(239, 68, 68, 0.8)', // Thickened & high-opacity border
+            border: '2px solid #ef4444', 
             color: '#ef4444', 
-            fontSize: '11px', 
+            // Equal width and height for a perfect circle
+            width: '52px', 
+            height: '52px', 
+            borderRadius: '50%',
+            // Flexbox centering for text
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '9px', 
             fontWeight: '900',
-            padding: '6px 14px', 
-            borderRadius: '6px',
             cursor: 'pointer',
             textTransform: 'uppercase',
             transition: 'all 0.2s ease',
-            marginLeft: '12px', // Forces space on the left to show the border clearly
-            boxSizing: 'border-box'
+            margin: '4px', 
+            boxSizing: 'border-box',
+            flexShrink: 0,
+            lineHeight: '1'
           }}
           onMouseOver={(e) => {
             e.target.style.background = 'rgba(239, 68, 68, 0.2)';
-            e.target.style.borderColor = 'rgba(239, 68, 68, 1)';
+            e.target.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.4)';
           }}
           onMouseOut={(e) => {
             e.target.style.background = 'rgba(239, 68, 68, 0.1)';
-            e.target.style.borderColor = 'rgba(239, 68, 68, 0.8)';
+            e.target.style.boxShadow = 'none';
           }}
         >
           Purge
@@ -98,7 +107,8 @@ const ShiftReport = ({ socket }) => {
         flex: 1, 
         overflowY: 'auto', 
         minHeight: 0,
-        paddingLeft: '10px' // Keeps the timeline circles away from the left panel border
+        paddingLeft: '10px',
+        paddingRight: '4px'
       }}>
         {treatedHistory.length === 0 ? (
           <div style={{ display: 'flex', gap: '16px', padding: '10px 0' }}>
@@ -142,7 +152,7 @@ const ShiftReport = ({ socket }) => {
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   padding: '12px', 
                   borderRadius: '8px',
-                  marginRight: '6px' // Buffer for scrollbar
+                  marginRight: '6px'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ overflow: 'hidden' }}>

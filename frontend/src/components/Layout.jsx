@@ -1,17 +1,14 @@
 import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
 import LiveClock from './LiveClock';
 
-const Layout = () => {
+const Layout = ({ children }) => {
   // Inline CSS for animations
   const animationStyles = `
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
-    .nav-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .nav-link:hover { transform: translateX(8px); background: rgba(255,255,255,0.05); }
   `;
 
   const sidebarStyle = {
@@ -26,24 +23,11 @@ const Layout = () => {
     zIndex: 100
   };
 
-  const navLinkStyle = ({ isActive }) => ({
-    padding: '16px 28px',
-    textDecoration: 'none',
-    color: isActive ? '#38bdf8' : '#94a3b8',
-    fontSize: '12px',
-    fontWeight: '700',
-    letterSpacing: '1.5px',
-    display: 'flex',
-    alignItems: 'center',
-    borderLeft: isActive ? '4px solid #38bdf8' : '4px solid transparent',
-    background: isActive ? 'linear-gradient(90deg, rgba(56, 189, 248, 0.15) 0%, transparent 100%)' : 'transparent',
-    animation: isActive ? 'pulse 2s infinite' : 'none'
-  });
-
   return (
     <div style={{ display: 'flex', background: '#f8fafc', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
       <style>{animationStyles}</style>
       
+      {/* Sidebar Branding */}
       <div style={sidebarStyle}>
         <div style={{ padding: '40px 28px' }}>
           <h1 style={{ 
@@ -56,39 +40,49 @@ const Layout = () => {
             WebkitTextFillColor: 'transparent'
           }}>UREKA</h1>
           <div style={{ width: '30px', height: '4px', background: '#38bdf8', marginTop: '8px', borderRadius: '2px' }}></div>
+          <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '16px', fontWeight: '500', letterSpacing: '0.5px' }}>
+            Emergency Room<br/>Command Center
+          </p>
         </div>
         
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <NavLink to="/admin" end className="nav-link" style={navLinkStyle}>OVERVIEW</NavLink>
-          <NavLink to="/admin/queue" className="nav-link" style={navLinkStyle}>LIVE QUEUE</NavLink>
-          <NavLink to="/admin/triage" className="nav-link" style={navLinkStyle}>NEW INTAKE</NavLink>
-          <NavLink to="/admin/reports" className="nav-link" style={navLinkStyle}>SHIFT REPORT</NavLink>
-        </nav>
-
+        {/* Node Status */}
         <div style={{ marginTop: 'auto', padding: '30px 28px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <small style={{ color: '#475569', fontSize: '10px', fontWeight: 'bold' }}>SECURE NODE: ACTIVE</small>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ 
+              width: '8px', 
+              height: '8px', 
+              borderRadius: '50%', 
+              background: '#10b981', 
+              animation: 'pulse 2s infinite' 
+            }}></div>
+            <small style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '800', letterSpacing: '1px' }}>
+              SECURE NODE: ACTIVE
+            </small>
+          </div>
         </div>
       </div>
 
-      <div style={{ marginLeft: '260px', flex: 1 }}>
+      {/* Main Content Viewport */}
+      <div style={{ marginLeft: '260px', flex: 1, display: 'flex', flexDirection: 'column', height: '100vh' }}>
         <header style={{ 
           background: 'rgba(255, 255, 255, 0.8)', 
           backdropFilter: 'blur(10px)',
-          padding: '20px 48px', 
+          padding: '20px 32px', 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          position: 'sticky',
-          top: 0,
           borderBottom: '1px solid #e2e8f0',
           zIndex: 90
         }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748b' }}>UNIT OPERATIONS COMMAND</span>
+          <span style={{ fontSize: '14px', fontWeight: '700', color: '#64748b', letterSpacing: '1px' }}>
+            UNIT OPERATIONS COMMAND
+          </span>
           <LiveClock />
         </header>
         
-        <main style={{ padding: '48px' }}>
-          <Outlet />
+        {/* The Dashboard Component injects here */}
+        <main style={{ padding: '24px', flex: 1, overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {children}
         </main>
       </div>
     </div>

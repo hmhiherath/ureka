@@ -1,83 +1,53 @@
 import React from 'react';
-import { useSocket } from '../hooks/useSocket';
-import PatientCard from '../components/PatientCard';
+import PatientCard from '../components/PatientCard'; // Assuming you have this visual component
 
-const PatientQueue = () => {
-  // Pull live data and actions from our Singleton WebSocket hook
-  const { queue, isConnected, emitTreatNext } = useSocket();
-
-  // Handler for extracting a patient from the queue
-  const handleTreatNext = (patientId) => {
-    // Find the patient to display their name in the confirmation dialog
-    const patient = queue.find(p => p.id === patientId);
-    if (!patient) return;
-
-    // Safety First: Medical applications require confirmation to prevent misclicks
-    const confirmMsg = `Confirm Action: Call ${patient.name} to Treatment?\n\nThis will extract them from the priority heap and update their status.`;
-    
-    if (window.confirm(confirmMsg)) {
-      // Tells the Python backend to run heap.extract_next()
-      emitTreatNext();
+const PatientQueue = ({ queue, socket, disabled }) => {
+  
+  const handleTreatNext = () => {
+    if (!disabled && socket) {
+      // Emit event to pop the highest priority patient off the backend Max-Heap
+      socket.emit('treat_next');
     }
   };
 
   return (
-    <div className="queue-page-container">
-      {/* --- Header & Status --- */}
-      <header className="page-header">
-        <div className="header-titles">
-          <h2>Live Triage Queue</h2>
-          <p className="subtitle">Ordered by Advanced Triage Severity Score (ATSS)</p>
-        </div>
-        <div className="header-stats">
-          <div className="stat-pill">
-            <span className="stat-label">Total Waiting:</span>
-            <span className="stat-value">{queue.length}</span>
-          </div>
-        </div>
-      </header>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Action Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h3 style={{ margin: 0, color: '#0f172a' }}>Live Queue (Max-Heap)</h3>
+        
+        <button 
+          onClick={handleTreatNext}
+          disabled={disabled || queue.length === 0}
+          style={{
+            padding: '10px 24px',
+            background: (disabled || queue.length === 0) ? '#cbd5e1' : '#10b981',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            fontWeight: 'bold',
+            cursor: (disabled || queue.length === 0) ? 'not-allowed' : 'pointer',
+            boxShadow: (disabled || queue.length === 0) ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.3)'
+          }}
+        >
+          👨‍⚕️ TREAT NEXT PATIENT
+        </button>
+      </div>
 
-      {/* --- Connection Warning --- */}
-      {!isConnected && (
-        <div className="connection-banner alert-danger">
-          ⚠️ <strong>Connection Lost:</strong> Attempting to reconnect to the triage server. Data may not be up to date.
+      {/* Queue List */}
+      {queue.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', background: '#fff', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+          <p style={{ fontSize: '18px', margin: '0 0 10px 0' }}>Queue is Empty</p>
+          <small>Waiting for new patient intake...</small>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {queue.map((patient, index) => (
+            // We pass rank=index+1 so the UI shows who is 1st, 2nd, etc.
+            <PatientCard key={patient.id} patient={patient} rank={index + 1} />
+          ))}
         </div>
       )}
-
-      {/* --- The Queue List --- */}
-      <div className="queue-list-container">
-        {queue.length === 0 ? (
-          <div className="empty-state-box">
-            <span className="empty-icon">🏥</span>
-            <h3>No Patients Waiting</h3>
-            <p>The triage queue is currently empty. All patients have been treated.</p>
-          </div>
-        ) : (
-          <div className="patient-cards-wrapper">
-            {queue.map((patient, index) => (
-              <div key={patient.id} className="queue-item">
-                
-                {/* Visual highlight for the root node of the Max-Heap */}
-                {index === 0 && (
-                  <div className="next-up-banner">
-                    ⭐ HIGHEST PRIORITY - NEXT TO BE TREATED
-                  </div>
-                )}
-
-                {/* ENGINEERING CONSTRAINT: 
-                  Because our backend uses a strict Max-Heap, you can ONLY extract the root node (index 0).
-                  Therefore, we only pass the 'onTreatNext' function to the very first patient in the array.
-                */}
-                <PatientCard 
-                  patient={patient} 
-                  onTreatNext={index === 0 ? handleTreatNext : null} 
-                />
-                
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 };

@@ -1,30 +1,12 @@
 version: '3.8'
 
 services:
-  # --- Database Service ---
-  db:
-    image: postgres:15
-    container_name: triage_db
-    restart: always
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: triage_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   # --- Python Backend ---
   backend:
     build: ./backend
     container_name: triage_backend
     restart: always
-    depends_on:
-      - db
-    environment:
-      # We use 'db' as the hostname because Docker links them by service name
-      SQLALCHEMY_DATABASE_URI: postgresql://user:password@db:5432/triage_db
+    # 'depends_on' and 'SQLALCHEMY_DATABASE_URI' have been removed
     ports:
       - "5000:5000"
 
@@ -40,5 +22,4 @@ services:
     stdin_open: true # Keeps the terminal active
     tty: true
 
-volumes:
-  postgres_data:
+# The 'volumes' block for postgres_data has been completely removed

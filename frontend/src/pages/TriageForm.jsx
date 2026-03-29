@@ -1,89 +1,135 @@
 import React, { useState } from 'react';
 
-const TriageForm = () => {
-  const [formData, setFormData] = useState({
+const AVAILABLE_SYMPTOMS = [
+  { id: "chest_pain", label: "Chest Pain" },
+  { id: "shortness_of_breath", label: "Shortness of Breath" },
+  { id: "severe_bleeding", label: "Severe Bleeding" },
+  { id: "fever", label: "Fever" },
+  { id: "headache", label: "Headache" },
+  { id: "rash", label: "Rash" }
+];
+
+const AVAILABLE_CONDITIONS = [
+  { id: "asthma", label: "Asthma" },
+  { id: "heart_disease", label: "Heart Disease" },
+  { id: "hypertension", label: "Hypertension" },
+  { id: "diabetes", label: "Diabetes" }
+];
+
+// NOTE: We now accept socket and disabled as props from Dashboard.jsx
+const TriageForm = ({ socket, disabled }) => {
+  const initialFormState = {
     name: '', age: '', gender: 'Other', pain_level: 5,
-    hr: '', sbp: '', dbp: '', temp: '', symptoms: ''
-  });
+    hr: '', sbp: '', dbp: '', temp: '', 
+    symptoms: [], conditions: [] 
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  const handleCheckboxChange = (category, value) => {
+    setFormData(prev => {
+      const currentList = prev[category];
+      if (currentList.includes(value)) {
+        return { ...prev, [category]: currentList.filter(item => item !== value) };
+      } else {
+        return { ...prev, [category]: [...currentList, value] };
+      }
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (disabled || !socket) return;
+
+    // Format data to match Pydantic schema expectations in backend
+    const payload = {
+      name: formData.name,
+      age: parseInt(formData.age),
+      gender: formData.gender,
+      pain_level: parseInt(formData.pain_level),
+      vitals: {
+        hr: parseInt(formData.hr),
+        sbp: parseInt(formData.sbp),
+        dbp: parseInt(formData.dbp),
+        temp: parseFloat(formData.temp)
+      },
+      symptoms: formData.symptoms,
+      conditions: formData.conditions
+    };
+
+    // Emit over WebSocket instead of using fetch() POST
+    socket.emit('new_patient', payload);
+    
+    // Clear form instantly for the next patient
+    setFormData(initialFormState);
+  };
 
   const inputStyle = {
-    width: '100%',
-    padding: '12px 16px',
-    margin: '8px 0 20px 0',
-    borderRadius: '8px',
-    border: '1px solid #e2e8f0',
-    fontSize: '15px',
-    outline: 'none',
-    transition: 'all 0.3s ease',
-    boxSizing: 'border-box'
-  };
-
-  const focusEffect = (e) => {
-    e.target.style.borderColor = '#3b82f6';
-    e.target.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.1)';
-  };
-
-  const blurEffect = (e) => {
-    e.target.style.borderColor = '#e2e8f0';
-    e.target.style.boxShadow = 'none';
+    width: '100%', padding: '10px 14px', margin: '4px 0 16px 0',
+    borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box'
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)' }}>
-        <h2 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>New Patient Intake</h2>
-        <p style={{ color: '#64748b', marginBottom: '30px' }}>Enter clinical data to calculate Max-Heap priority score.</p>
-        
-        <form>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '20px' }}>
-            <div>
-              <label style={{ fontWeight: '600', color: '#475569', fontSize: '14px' }}>Full Name</label>
-              <input style={inputStyle} onFocus={focusEffect} onBlur={blurEffect} placeholder="e.g. John Doe" />
-            </div>
-            <div>
-              <label style={{ fontWeight: '600', color: '#475569', fontSize: '14px' }}>Age</label>
-              <input type="number" style={inputStyle} onFocus={focusEffect} onBlur={blurEffect} />
-            </div>
-            <div>
-              <label style={{ fontWeight: '600', color: '#475569', fontSize: '14px' }}>Gender</label>
-              <select style={inputStyle} onFocus={focusEffect} onBlur={blurEffect}>
-                <option>Male</option><option>Female</option><option>Other</option>
-              </select>
-            </div>
+    <div>
+      <h3 style={{ marginTop: 0, color: '#0f172a' }}>Patient Intake</h3>
+      <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>Enter clinical data to calculate priority.</p>
+      
+      <form onSubmit={handleSubmit}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px' }}>
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Full Name</label>
+            <input required style={inputStyle} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} disabled={disabled}/>
           </div>
-
-          <div style={{ background: '#f8fafc', padding: '25px', borderRadius: '12px', marginBottom: '30px', border: '1px dashed #cbd5e1' }}>
-            <h4 style={{ margin: '0 0 15px 0', color: '#334155', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' }}>Vital Signs</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
-              <div><small>Heart Rate</small><input placeholder="BPM" style={inputStyle} onFocus={focusEffect} onBlur={blurEffect} /></div>
-              <div><small>Systolic</small><input placeholder="mmHg" style={inputStyle} onFocus={focusEffect} onBlur={blurEffect} /></div>
-              <div><small>Diastolic</small><input placeholder="mmHg" style={inputStyle} onFocus={focusEffect} onBlur={blurEffect} /></div>
-              <div><small>Temp</small><input placeholder="°C" style={inputStyle} onFocus={focusEffect} onBlur={blurEffect} /></div>
-            </div>
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Age</label>
+            <input required type="number" style={inputStyle} value={formData.age} onChange={e => setFormData({...formData, age: e.target.value})} disabled={disabled}/>
           </div>
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Gender</label>
+            <select style={inputStyle} value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} disabled={disabled}>
+              <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+        </div>
 
-          <label style={{ fontWeight: '600', color: '#475569', fontSize: '14px' }}>Symptoms / Chief Complaint</label>
-          <textarea style={{ ...inputStyle, height: '100px', resize: 'none' }} onFocus={focusEffect} onBlur={blurEffect} placeholder="Describe patient condition..."></textarea>
+        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #e2e8f0' }}>
+          <h4 style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#334155', textTransform: 'uppercase' }}>Vitals & Pain</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
+            <div><small>HR</small><input required style={inputStyle} value={formData.hr} onChange={e => setFormData({...formData, hr: e.target.value})} disabled={disabled}/></div>
+            <div><small>SBP</small><input required style={inputStyle} value={formData.sbp} onChange={e => setFormData({...formData, sbp: e.target.value})} disabled={disabled}/></div>
+            <div><small>DBP</small><input required style={inputStyle} value={formData.dbp} onChange={e => setFormData({...formData, dbp: e.target.value})} disabled={disabled}/></div>
+            <div><small>Temp(°C)</small><input required style={inputStyle} value={formData.temp} onChange={e => setFormData({...formData, temp: e.target.value})} disabled={disabled}/></div>
+            <div><small>Pain (1-10)</small><input required type="number" min="1" max="10" style={inputStyle} value={formData.pain_level} onChange={e => setFormData({...formData, pain_level: e.target.value})} disabled={disabled}/></div>
+          </div>
+        </div>
 
-          <button style={{
-            width: '100%',
-            padding: '16px',
-            background: '#2563eb',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '700',
-            cursor: 'pointer',
-            transition: 'background 0.2s'
-          }}
-          onMouseOver={(e) => e.target.style.background = '#1d4ed8'}
-          onMouseOut={(e) => e.target.style.background = '#2563eb'}
-          >
-            ADMIT TO TRIAGE QUEUE
-          </button>
-        </form>
-      </div>
+        <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '8px' }}>Symptoms</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+          {AVAILABLE_SYMPTOMS.map(item => (
+            <label key={item.id} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', opacity: disabled ? 0.5 : 1 }}>
+              <input type="checkbox" style={{ marginRight: '8px' }} checked={formData.symptoms.includes(item.id)} onChange={() => handleCheckboxChange("symptoms", item.id)} disabled={disabled} />
+              {item.label}
+            </label>
+          ))}
+        </div>
+
+        <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '8px' }}>Conditions</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '24px' }}>
+          {AVAILABLE_CONDITIONS.map(item => (
+            <label key={item.id} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', opacity: disabled ? 0.5 : 1 }}>
+              <input type="checkbox" style={{ marginRight: '8px' }} checked={formData.conditions.includes(item.id)} onChange={() => handleCheckboxChange("conditions", item.id)} disabled={disabled} />
+              {item.label}
+            </label>
+          ))}
+        </div>
+
+        <button type="submit" disabled={disabled} style={{
+          width: '100%', padding: '14px', background: disabled ? '#94a3b8' : '#2563eb', color: '#fff',
+          border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: disabled ? 'not-allowed' : 'pointer'
+        }}>
+          {disabled ? 'CONNECTION OFFLINE' : 'ADMIT TO QUEUE'}
+        </button>
+      </form>
     </div>
   );
 };

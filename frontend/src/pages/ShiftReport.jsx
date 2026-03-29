@@ -1,126 +1,78 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import SeverityBadge from '../components/SeverityBadge';
+import React, { useState, useEffect } from 'react';
 
-const ShiftReport = () => {
-  const [treatedPatients, setTreatedPatients] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+const ShiftReport = ({ socket }) => {
+  const [treatedHistory, setTreatedHistory] = useState([]);
 
-  // Fetch the historical data when the component mounts
+  // 1. Load history from LocalStorage on component mount
   useEffect(() => {
-    const fetchShiftReport = async () => {
+    const savedHistory = localStorage.getItem('triageTreatedHistory');
+    if (savedHistory) {
       try {
-        // We use a standard REST fetch for historical reports, not WebSockets
-        const response = await fetch('http://localhost:5000/api/reports/shift');
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch shift report data');
-        }
-        
-        const data = await response.json();
-        setTreatedPatients(data.patients);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+        setTreatedHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Failed to parse local history");
       }
-    };
-
-    fetchShiftReport();
+    }
   }, []);
 
-  // Calculate Shift Statistics using useMemo for performance
-  const stats = useMemo(() => {
-    if (!treatedPatients || treatedPatients.length === 0) return null;
+  // 2. Listen for 'patient_called' to update local history
+  useEffect(() => {
+    if (!socket) return;
 
-    const total = treatedPatients.length;
-    const maxScore = Math.max(...treatedPatients.map(p => p.severity_score));
-    const escalatedCount = treatedPatients.filter(p => p.escalated).length;
+    const handlePatientCalled = (data) => {
+      setTreatedHistory(prev => {
+        // Add timestamp to the backend payload
+        const newRecord = { ...data, timeTreated: new Date().toLocaleTimeString() };
+        const newHistory = [newRecord, ...prev]; // Add to top of list
+        
+        // Save back to LocalStorage immediately
+        localStorage.setItem('triageTreatedHistory', JSON.stringify(newHistory));
+        return newHistory;
+      });
+    };
 
-    return { total, maxScore, escalatedCount };
-  }, [treatedPatients]);
+    socket.on('patient_called', handlePatientCalled);
 
-  // Handle printing the report
-  const handlePrint = () => {
-    window.print();
+    return () => {
+      socket.off('patient_called', handlePatientCalled);
+    };
+  }, [socket]);
+
+  const clearHistory = () => {
+    if(window.confirm("Are you sure you want to clear the local shift history?")) {
+      localStorage.removeItem('triageTreatedHistory');
+      setTreatedHistory([]);
+    }
   };
 
-  if (isLoading) return <div className="loading-spinner">Loading Shift Data...</div>;
-  if (error) return <div className="error-banner">Error: {error}</div>;
-
   return (
-    <div className="shift-report-container">
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h3 style={{ margin: 0, color: '#0f172a' }}>Local Shift Record</h3>
+        <button onClick={clearHistory} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>
+          Clear
+        </button>
+      </div>
       
-      {/* --- Report Header --- */}
-      <header className="report-header">
-        <div className="report-branding">
-          <h2>End of Shift Summary Report</h2>
-          <p className="report-date">
-            Generated: {new Date().toLocaleString()}
-          </p>
-        </div>
-        <div className="report-actions no-print">
-          <button className="btn btn-primary" onClick={handlePrint}>
-            🖨️ Print / Save as PDF
-          </button>
-        </div>
-      </header>
+      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '20px', lineHeight: '1.4' }}>
+        This history is saved in your browser. It will persist even if the server connection drops.
+      </p>
 
-      {/* --- Shift Statistics --- */}
-      {stats ? (
-        <div className="report-stats-grid">
-          <div className="stat-box">
-            <h4>Total Patients Treated</h4>
-            <span className="stat-number">{stats.total}</span>
-          </div>
-          <div className="stat-box">
-            <h4>Highest ATSS Score Handled</h4>
-            <span className="stat-number text-danger">{stats.maxScore.toFixed(1)}</span>
-          </div>
-          <div className="stat-box">
-            <h4>Automated Escalations</h4>
-            <span className="stat-number text-warning">{stats.escalatedCount}</span>
-          </div>
+      {treatedHistory.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8', fontSize: '13px' }}>
+          No patients treated yet during this session.
         </div>
       ) : (
-        <div className="empty-state">No patients treated during this shift yet.</div>
-      )}
-
-      {/* --- Detailed Patient Log --- */}
-      {treatedPatients.length > 0 && (
-        <div className="report-table-wrapper">
-          <h3 className="table-title">Treated Patient Log</h3>
-          <table className="report-table">
-            <thead>
-              <tr>
-                <th>Time Arrived</th>
-                <th>Patient ID</th>
-                <th>Name</th>
-                <th>Primary Symptoms</th>
-                <th>Final ATSS</th>
-                <th>Escalated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {treatedPatients.map((patient) => (
-                <tr key={patient.id}>
-                  <td>{new Date(patient.arrival_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-                  <td>#{patient.id}</td>
-                  <td><strong>{patient.name}</strong></td>
-                  <td className="symptoms-cell">
-                    {/* Convert array to string safely */}
-                    {Array.isArray(patient.symptoms) ? patient.symptoms.join(', ') : patient.symptoms}
-                  </td>
-                  <td>
-                    <SeverityBadge score={patient.severity_score} />
-                  </td>
-                  <td>
-                    {patient.escalated ? <span className="badge-warning">Yes</span> : <span className="text-muted">No</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {treatedHistory.map((record, index) => (
+            <div key={index} style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', borderLeft: '4px solid #10b981', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <strong style={{ display: 'block', fontSize: '14px', color: '#1e293b' }}>{record.name}</strong>
+                <small style={{ color: '#64748b' }}>ID: #{record.id}</small>
+              </div>
+              <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 'bold' }}>{record.timeTreated}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

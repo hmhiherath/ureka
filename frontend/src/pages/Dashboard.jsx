@@ -73,24 +73,24 @@ const Dashboard = () => {
         minHeight: 0 // Crucial CSS trick to allow columns to scroll independently
       }}>
         
-        {/* LEFT: Intake Form - Added visible border */}
+        {/* LEFT: Intake Form */}
         <div className="glass-panel" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.15)' 
+          border: '1px solid rgba(255, 255, 255, 0.2)' // Explicit visible border
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <TriageForm socket={socket} disabled={!isConnected} />
           </div>
         </div>
 
-        {/* CENTER: Action Queue (The Max-Heap) - Enhanced focal border */}
+        {/* CENTER: Action Queue (The Max-Heap) */}
         <div className="glass-panel" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(56, 189, 248, 0.4)',
+          border: '1px solid rgba(56, 189, 248, 0.4)', // Themed blue border
           boxShadow: '0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.02)'
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
@@ -98,12 +98,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* RIGHT: Local History Report - Added visible border */}
+        {/* RIGHT: Mission Log (Shift Report) */}
+        {/* Updated border visibility for the Mission Log panel */}
         <div className="glass-panel" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.15)'
+          border: '1px solid rgba(255, 255, 255, 0.2)', // Forced visible left/right/top/bottom borders
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <ShiftReport socket={socket} />

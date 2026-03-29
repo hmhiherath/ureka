@@ -29,7 +29,7 @@ const ShiftReport = ({ socket }) => {
   }, [socket]);
 
   const clearHistory = () => {
-    if(window.confirm("SECURE OVERRIDE: Are you sure you want to permanently purge the local shift history?")) {
+    if(window.confirm("SECURE OVERRIDE: Purge local shift history?")) {
       localStorage.removeItem('triageTreatedHistory');
       setTreatedHistory([]);
     }
@@ -63,8 +63,8 @@ const ShiftReport = ({ socket }) => {
         </button>
       </div>
 
-      {/* Scrollable Timeline Container */}
-      <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
+      {/* Scrollable Content Area */}
+      <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', minHeight: 0, paddingRight: '4px' }}>
         {treatedHistory.length === 0 ? (
           <div style={{ 
             textAlign: 'center', 
@@ -75,10 +75,10 @@ const ShiftReport = ({ socket }) => {
             border: '1px dashed rgba(255, 255, 255, 0.05)'
           }}>
             <div style={{ fontSize: '24px', marginBottom: '10px', opacity: 0.5 }}>🗄️</div>
-            <div style={{ fontSize: '13px', fontWeight: '600' }}>No local records found for this shift.</div>
+            <div style={{ fontSize: '13px', fontWeight: '600' }}>No records found.</div>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '10px', marginTop: '10px' }}>
             {treatedHistory.map((record, index) => (
               <div key={index} style={{ 
                 position: 'relative', 
@@ -86,18 +86,7 @@ const ShiftReport = ({ socket }) => {
                 paddingBottom: '24px',
                 borderLeft: index === treatedHistory.length - 1 ? 'none' : '2px solid rgba(56, 189, 248, 0.2)'
               }}>
-                <div style={{
-                  position: 'absolute',
-                  left: '-5px',
-                  top: '0',
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#38bdf8',
-                  boxShadow: '0 0 12px #38bdf8',
-                  zIndex: 2
-                }}></div>
-
+                <div style={{ position: 'absolute', left: '-5px', top: '0', width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 12px #38bdf8', zIndex: 2 }}></div>
                 <div style={{ 
                   background: 'rgba(255, 255, 255, 0.02)', 
                   border: '1px solid rgba(255, 255, 255, 0.05)',

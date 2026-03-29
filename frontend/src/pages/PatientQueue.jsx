@@ -11,7 +11,7 @@ const PatientQueue = ({ queue, socket, disabled }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', opacity: disabled ? 0.7 : 1, transition: 'opacity 0.3s' }}>
-      {/* Action Header - Remains Fixed */}
+      {/* Action Header - Fixed (flex-shrink: 0) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexShrink: 0 }}>
         <div>
           <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '20px', fontWeight: '800' }}>Live Queue</h3>
@@ -43,8 +43,8 @@ const PatientQueue = ({ queue, socket, disabled }) => {
         </button>
       </div>
 
-      {/* Scrollable Container */}
-      <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
+      {/* Scrollable Content Area */}
+      <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', minHeight: 0, paddingRight: '4px' }}>
         {queue.length === 0 ? (
           <div style={{ 
             textAlign: 'center', 
@@ -56,8 +56,7 @@ const PatientQueue = ({ queue, socket, disabled }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%'
+            justifyContent: 'center'
           }}>
             <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.5 }}>🩺</div>
             <p style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: '700', color: '#94a3b8' }}>Queue is Empty</p>

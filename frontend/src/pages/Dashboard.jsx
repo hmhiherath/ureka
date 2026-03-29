@@ -14,15 +14,24 @@ const Dashboard = () => {
   const { socket, isConnected, queue, totalWaiting } = useSocket();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100vh', // Force height to viewport height
+      width: '100vw',  // Force width to viewport width
+      padding: '24px', // Add padding so panels don't touch browser edges
+      boxSizing: 'border-box', // Ensure padding doesn't add to width
+      overflow: 'hidden' // Prevent any container-level scrolling
+    }}>
       
       {/* --- DASHBOARD HEADER & STATUS BAR --- */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        marginBottom: '24px',
-        padding: '0 8px'
+        marginBottom: '20px',
+        padding: '0 8px',
+        flexShrink: 0 // Prevent header from shrinking
       }}>
         <div>
           <h2 style={{ margin: 0, color: '#f8fafc', fontSize: '28px', fontWeight: '900', letterSpacing: '-0.5px' }}>
@@ -68,9 +77,10 @@ const Dashboard = () => {
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '27% 46% 27%', 
-        gap: '24px', 
+        gap: '20px', 
         flex: 1, 
-        minHeight: 0 
+        minHeight: 0,
+        width: '100%' // Ensure grid stays within parent padding
       }}>
         
         {/* LEFT: Intake Form */}
@@ -99,14 +109,12 @@ const Dashboard = () => {
         </div>
 
         {/* RIGHT: Mission Log (Shift Report) */}
-        {/* HIGH CONTRAST BORDER UPDATE */}
         <div className="glass-panel" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.3)', // Increased visibility
-          borderLeft: '2px solid rgba(255, 255, 255, 0.4)', // Reinforced left border specifically
-          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5)'
+          border: '1px solid rgba(255, 255, 255, 0.3)', // High visibility border
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <ShiftReport socket={socket} />

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 const ShiftReport = ({ socket }) => {
   const [treatedHistory, setTreatedHistory] = useState([]);
 
-  // Load history from LocalStorage
   useEffect(() => {
     const savedHistory = localStorage.getItem('triageTreatedHistory');
     if (savedHistory) {
@@ -15,7 +14,6 @@ const ShiftReport = ({ socket }) => {
     }
   }, []);
 
-  // Socket listener for new treated patients
   useEffect(() => {
     if (!socket) return;
 
@@ -44,62 +42,59 @@ const ShiftReport = ({ socket }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header with Right-Aligned Purge Button */}
+      {/* Header: All elements aligned left, Purge button following the text */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '20px',
-        flexShrink: 0,
-        width: '100%'
+        alignItems: 'flex-start', 
+        marginBottom: '24px',
+        flexShrink: 0 
       }}>
-        <div style={{ flex: 1 }}>
+        <div>
           <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '18px', fontWeight: '900', letterSpacing: '-0.5px' }}>
             Mission Log
           </h3>
-          <span style={{ fontSize: '10px', color: '#38bdf8', fontWeight: '800', textTransform: 'uppercase' }}>
-            Local Node Active
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+            <span style={{ fontSize: '10px', color: '#38bdf8', fontWeight: '800', textTransform: 'uppercase' }}>
+              Local Node Active
+            </span>
+            <button 
+              onClick={clearHistory} 
+              style={{ 
+                background: 'transparent', 
+                border: '1px solid rgba(239, 68, 68, 0.3)', 
+                color: '#ef4444', 
+                fontSize: '9px', 
+                fontWeight: '800',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                textTransform: 'uppercase'
+              }}
+            >
+              Purge
+            </button>
+          </div>
         </div>
-        
-        {/* Purge button strictly right-aligned */}
-        <button 
-          onClick={clearHistory} 
-          style={{ 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            border: '1px solid rgba(239, 68, 68, 0.4)', 
-            color: '#ef4444', 
-            fontSize: '10px', 
-            fontWeight: '800',
-            padding: '6px 12px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            textTransform: 'uppercase',
-            flexShrink: 0
-          }}
-        >
-          Purge Log
-        </button>
       </div>
 
-      {/* Timeline Content */}
+      {/* Timeline Content: Left Aligned */}
       <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
         {treatedHistory.length === 0 ? (
           <div style={{ 
             display: 'flex',
-            justifyContent: 'flex-end', // Aligns the message to the right
-            padding: '20px 0'
+            gap: '12px',
+            padding: '10px 0'
           }}>
-            <div style={{ 
-              textAlign: 'right',
-              color: '#475569', 
-              borderRight: '2px solid rgba(56, 189, 248, 0.3)',
-              paddingRight: '12px'
-            }}>
+            {/* Visual indicator for empty state on the left */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '12px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', border: '2px solid #475569' }}></div>
+            </div>
+            <div style={{ textAlign: 'left', color: '#475569' }}>
               <span style={{ fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>
                 Waiting for deployments
               </span>
-              <p style={{ margin: '4px 0 0 0', fontSize: '10px', opacity: 0.6 }}>System Idle...</p>
+              <p style={{ margin: '2px 0 0 0', fontSize: '10px', opacity: 0.6 }}>Standing by for incoming data...</p>
             </div>
           </div>
         ) : (
@@ -109,9 +104,9 @@ const ShiftReport = ({ socket }) => {
               gap: '12px', 
               marginBottom: '16px'
             }}>
-              {/* Vertical Connector */}
+              {/* Vertical Connector (Left Side) */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '12px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', zIndex: 2 }}></div>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.4)', zIndex: 2 }}></div>
                 {index !== treatedHistory.length - 1 && (
                   <div style={{ width: '2px', flex: 1, background: 'rgba(56, 189, 248, 0.2)', marginTop: '4px' }}></div>
                 )}
@@ -123,14 +118,15 @@ const ShiftReport = ({ socket }) => {
                 background: 'rgba(30, 41, 59, 0.4)', 
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 padding: '10px 12px', 
-                borderRadius: '8px'
+                borderRadius: '8px',
+                marginTop: '-4px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ maxWidth: '65%' }}>
                     <div style={{ fontSize: '13px', color: '#f1f5f9', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {record.name}
                     </div>
-                    <div style={{ fontSize: '10px', color: '#94a3b8' }}>ID: #{record.id}</div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', fontFamily: 'monospace' }}>ID: #{record.id}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '11px', color: '#38bdf8', fontWeight: '900' }}>{record.timeTreated}</div>

@@ -38,7 +38,7 @@ const Dashboard = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          background: 'rgba(15, 23, 42, 0.6)', // Dark glass
+          background: 'rgba(15, 23, 42, 0.6)', 
           backdropFilter: 'blur(10px)',
           padding: '10px 20px',
           borderRadius: '30px',
@@ -67,10 +67,10 @@ const Dashboard = () => {
       {/* --- 3-COLUMN COMMAND CENTER GRID --- */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '27% 46% 27%', // Optimal split for content
+        gridTemplateColumns: '27% 46% 27%', 
         gap: '24px', 
         flex: 1, 
-        minHeight: 0 // Crucial CSS trick to allow columns to scroll independently
+        minHeight: 0 
       }}>
         
         {/* LEFT: Intake Form */}
@@ -78,19 +78,19 @@ const Dashboard = () => {
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.2)' // Explicit visible border
+          border: '1px solid rgba(255, 255, 255, 0.2)' 
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <TriageForm socket={socket} disabled={!isConnected} />
           </div>
         </div>
 
-        {/* CENTER: Action Queue (The Max-Heap) */}
+        {/* CENTER: Action Queue */}
         <div className="glass-panel" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(56, 189, 248, 0.4)', // Themed blue border
+          border: '1px solid rgba(56, 189, 248, 0.4)',
           boxShadow: '0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.02)'
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
@@ -99,13 +99,14 @@ const Dashboard = () => {
         </div>
 
         {/* RIGHT: Mission Log (Shift Report) */}
-        {/* Updated border visibility for the Mission Log panel */}
+        {/* HIGH CONTRAST BORDER UPDATE */}
         <div className="glass-panel" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.2)', // Forced visible left/right/top/bottom borders
-          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
+          border: '1px solid rgba(255, 255, 255, 0.3)', // Increased visibility
+          borderLeft: '2px solid rgba(255, 255, 255, 0.4)', // Reinforced left border specifically
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5)'
         }}>
           <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
             <ShiftReport socket={socket} />

@@ -11,14 +11,13 @@ const PatientQueue = ({ queue, socket, disabled }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', opacity: disabled ? 0.7 : 1, transition: 'opacity 0.3s' }}>
-      {/* Action Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+      {/* Action Header - Remains Fixed */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexShrink: 0 }}>
         <div>
           <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '20px', fontWeight: '800' }}>Live Queue</h3>
           <p style={{ fontSize: '13px', color: '#38bdf8', marginTop: '4px', fontWeight: '600', letterSpacing: '0.5px' }}>MAX-HEAP ALGORITHM ACTIVE</p>
         </div>
         
-        {/* Glowing Treat Action Button */}
         <button 
           onClick={handleTreatNext}
           disabled={disabled || queue.length === 0}
@@ -39,39 +38,39 @@ const PatientQueue = ({ queue, socket, disabled }) => {
             alignItems: 'center',
             gap: '8px'
           }}
-          onMouseOver={(e) => !(disabled || queue.length === 0) && (e.currentTarget.style.transform = 'translateY(-2px)')}
-          onMouseOut={(e) => !(disabled || queue.length === 0) && (e.currentTarget.style.transform = 'translateY(0)')}
         >
           <span style={{ fontSize: '16px' }}>⚕️</span> TREAT NEXT
         </button>
       </div>
 
-      {/* Queue List / Empty State */}
-      {queue.length === 0 ? (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '60px 20px', 
-          color: '#64748b', 
-          background: 'rgba(0, 0, 0, 0.2)', 
-          borderRadius: '16px', 
-          border: '1px dashed rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flex: 1
-        }}>
-          <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.5 }}>🩺</div>
-          <p style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: '700', color: '#94a3b8' }}>Queue is Empty</p>
-          <small style={{ fontSize: '13px' }}>Awaiting incoming patient telemetry...</small>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '20px' }}>
-          {queue.map((patient, index) => (
-            <PatientCard key={patient.id} patient={patient} rank={index + 1} />
-          ))}
-        </div>
-      )}
+      {/* Scrollable Container */}
+      <div className="custom-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
+        {queue.length === 0 ? (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '60px 20px', 
+            color: '#64748b', 
+            background: 'rgba(0, 0, 0, 0.2)', 
+            borderRadius: '16px', 
+            border: '1px dashed rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%'
+          }}>
+            <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.5 }}>🩺</div>
+            <p style={{ fontSize: '18px', margin: '0 0 8px 0', fontWeight: '700', color: '#94a3b8' }}>Queue is Empty</p>
+            <small style={{ fontSize: '13px' }}>Awaiting incoming patient telemetry...</small>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '20px' }}>
+            {queue.map((patient, index) => (
+              <PatientCard key={patient.id} patient={patient} rank={index + 1} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

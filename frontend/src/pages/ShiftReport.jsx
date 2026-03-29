@@ -42,7 +42,7 @@ const ShiftReport = ({ socket }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header: All elements aligned left, Purge button following the text */}
+      {/* Header: Left aligned with a more prominent Purge button */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -54,23 +54,27 @@ const ShiftReport = ({ socket }) => {
           <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '18px', fontWeight: '900', letterSpacing: '-0.5px' }}>
             Mission Log
           </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '6px' }}>
             <span style={{ fontSize: '10px', color: '#38bdf8', fontWeight: '800', textTransform: 'uppercase' }}>
               Local Node Active
             </span>
             <button 
               onClick={clearHistory} 
               style={{ 
-                background: 'transparent', 
-                border: '1px solid rgba(239, 68, 68, 0.3)', 
+                background: 'rgba(239, 68, 68, 0.1)', // Added slight background for better visibility
+                border: '1px solid rgba(239, 68, 68, 0.4)', 
                 color: '#ef4444', 
-                fontSize: '9px', 
-                fontWeight: '800',
-                padding: '2px 6px',
-                borderRadius: '4px',
+                fontSize: '11px', // Increased font size
+                fontWeight: '900',
+                padding: '4px 10px', // Increased padding
+                borderRadius: '6px',
                 cursor: 'pointer',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                transition: 'all 0.2s ease',
+                letterSpacing: '0.5px'
               }}
+              onMouseOver={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.2)'}
+              onMouseOut={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.1)'}
             >
               Purge
             </button>
@@ -78,7 +82,7 @@ const ShiftReport = ({ socket }) => {
         </div>
       </div>
 
-      {/* Timeline Content: Left Aligned */}
+      {/* Timeline Content */}
       <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
         {treatedHistory.length === 0 ? (
           <div style={{ 
@@ -86,7 +90,6 @@ const ShiftReport = ({ socket }) => {
             gap: '12px',
             padding: '10px 0'
           }}>
-            {/* Visual indicator for empty state on the left */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '12px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', border: '2px solid #475569' }}></div>
             </div>
@@ -104,7 +107,6 @@ const ShiftReport = ({ socket }) => {
               gap: '12px', 
               marginBottom: '16px'
             }}>
-              {/* Vertical Connector (Left Side) */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '12px' }}>
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', boxShadow: '0 0 8px rgba(56, 189, 248, 0.4)', zIndex: 2 }}></div>
                 {index !== treatedHistory.length - 1 && (
@@ -112,7 +114,6 @@ const ShiftReport = ({ socket }) => {
                 )}
               </div>
 
-              {/* Patient Card */}
               <div style={{ 
                 flex: 1,
                 background: 'rgba(30, 41, 59, 0.4)', 

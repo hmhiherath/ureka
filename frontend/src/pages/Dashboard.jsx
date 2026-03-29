@@ -17,11 +17,13 @@ const Dashboard = () => {
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      height: '100vh', // Force height to viewport height
-      width: '100vw',  // Force width to viewport width
-      padding: '24px', // Add padding so panels don't touch browser edges
-      boxSizing: 'border-box', // Ensure padding doesn't add to width
-      overflow: 'hidden' // Prevent any container-level scrolling
+      height: '100vh', 
+      width: '100%',
+      maxWidth: '100vw', // Prevents horizontal spill
+      padding: '20px', 
+      boxSizing: 'border-box',
+      overflow: 'hidden',
+      backgroundColor: '#020617' // Matches body background
     }}>
       
       {/* --- DASHBOARD HEADER & STATUS BAR --- */}
@@ -30,45 +32,43 @@ const Dashboard = () => {
         justifyContent: 'space-between', 
         alignItems: 'center', 
         marginBottom: '20px',
-        padding: '0 8px',
-        flexShrink: 0 // Prevent header from shrinking
+        padding: '0 4px',
+        flexShrink: 0
       }}>
         <div>
-          <h2 style={{ margin: 0, color: '#f8fafc', fontSize: '28px', fontWeight: '900', letterSpacing: '-0.5px' }}>
+          <h2 style={{ margin: 0, color: '#f8fafc', fontSize: '24px', fontWeight: '900', letterSpacing: '-0.5px' }}>
             Active Triage Sector
           </h2>
-          <p style={{ margin: '6px 0 0 0', color: '#94a3b8', fontSize: '14px', fontWeight: '500' }}>
-            Total Patients Waiting: <strong style={{ color: '#38bdf8', fontSize: '16px' }}>{totalWaiting}</strong>
+          <p style={{ margin: '4px 0 0 0', color: '#94a3b8', fontSize: '13px', fontWeight: '500' }}>
+            Total Patients Waiting: <strong style={{ color: '#38bdf8', fontSize: '15px' }}>{totalWaiting}</strong>
           </p>
         </div>
 
-        {/* Premium Dark-Mode Connection Badge */}
+        {/* Connection Badge */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          background: 'rgba(15, 23, 42, 0.6)', 
+          background: 'rgba(15, 23, 42, 0.8)', 
           backdropFilter: 'blur(10px)',
-          padding: '10px 20px',
+          padding: '8px 16px',
           borderRadius: '30px',
           border: `1px solid ${isConnected ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-          boxShadow: isConnected ? '0 0 20px rgba(16, 185, 129, 0.1)' : '0 0 20px rgba(239, 68, 68, 0.1)'
         }}>
           <div style={{
-            width: '10px',
-            height: '10px',
+            width: '8px',
+            height: '8px',
             borderRadius: '50%',
             background: isConnected ? '#10b981' : '#ef4444',
             boxShadow: isConnected ? '0 0 12px #10b981' : '0 0 12px #ef4444',
-            animation: isConnected ? 'pulse-glow 2s infinite' : 'none'
           }}></div>
           <span style={{ 
             color: isConnected ? '#10b981' : '#ef4444', 
             fontWeight: '700', 
-            fontSize: '12px',
+            fontSize: '11px',
             letterSpacing: '1px'
           }}>
-            {isConnected ? 'SYSTEM SECURE' : 'CONNECTION LOST'}
+            {isConnected ? 'SYSTEM SECURE' : 'OFFLINE'}
           </span>
         </div>
       </div>
@@ -76,11 +76,12 @@ const Dashboard = () => {
       {/* --- 3-COLUMN COMMAND CENTER GRID --- */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: '27% 46% 27%', 
+        gridTemplateColumns: '1fr 1.8fr 1fr', // Ratio-based sizing instead of fixed %
         gap: '20px', 
         flex: 1, 
         minHeight: 0,
-        width: '100%' // Ensure grid stays within parent padding
+        width: '100%',
+        boxSizing: 'border-box'
       }}>
         
         {/* LEFT: Intake Form */}
@@ -88,9 +89,9 @@ const Dashboard = () => {
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.2)' 
+          border: '1px solid rgba(255, 255, 255, 0.1)' 
         }}>
-          <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
+          <div style={{ overflowY: 'auto', padding: '20px', height: '100%' }}>
             <TriageForm socket={socket} disabled={!isConnected} />
           </div>
         </div>
@@ -100,10 +101,10 @@ const Dashboard = () => {
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(56, 189, 248, 0.4)',
-          boxShadow: '0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.02)'
+          border: '1px solid rgba(56, 189, 248, 0.3)',
+          boxShadow: 'inset 0 0 20px rgba(56, 189, 248, 0.05)'
         }}>
-          <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
+          <div style={{ overflowY: 'auto', padding: '20px', height: '100%' }}>
             <PatientQueue queue={queue} socket={socket} disabled={!isConnected} />
           </div>
         </div>
@@ -113,10 +114,10 @@ const Dashboard = () => {
           display: 'flex', 
           flexDirection: 'column', 
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.3)', // High visibility border
-          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)'
+          border: '1px solid rgba(255, 255, 255, 0.2)', // Visible right border
+          marginRight: '2px' // Small buffer to ensure border doesn't clip browser edge
         }}>
-          <div style={{ overflowY: 'auto', padding: '24px', height: '100%' }}>
+          <div style={{ overflowY: 'auto', padding: '20px', height: '100%' }}>
             <ShiftReport socket={socket} />
           </div>
         </div>

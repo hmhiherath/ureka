@@ -43,15 +43,16 @@ const ShiftReport = ({ socket }) => {
       display: 'flex', 
       flexDirection: 'column', 
       height: '100%',
-      padding: '4px' // Extra safety padding to prevent border clipping
+      padding: '2px' // Subtle inner padding to keep elements away from glass borders
     }}>
-      {/* Header: Fixed at top */}
+      {/* --- HEADER SECTION --- */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
         marginBottom: '24px',
-        flexShrink: 0 
+        flexShrink: 0,
+        paddingRight: '4px' // Ensures button doesn't touch the right border
       }}>
         <div>
           <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '18px', fontWeight: '900', letterSpacing: '-0.5px' }}>
@@ -62,33 +63,42 @@ const ShiftReport = ({ socket }) => {
           </span>
         </div>
         
+        {/* Reinforced Purge Button */}
         <button 
           onClick={clearHistory} 
           style={{ 
-            background: 'rgba(239, 68, 68, 0.15)', 
-            border: '1px solid rgba(239, 68, 68, 0.4)', 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            border: '1.5px solid rgba(239, 68, 68, 0.8)', // Thickened & high-opacity border
             color: '#ef4444', 
             fontSize: '11px', 
             fontWeight: '900',
-            padding: '6px 12px',
+            padding: '6px 14px', 
             borderRadius: '6px',
             cursor: 'pointer',
             textTransform: 'uppercase',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            marginLeft: '12px', // Forces space on the left to show the border clearly
+            boxSizing: 'border-box'
           }}
-          onMouseOver={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.25)'}
-          onMouseOut={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.15)'}
+          onMouseOver={(e) => {
+            e.target.style.background = 'rgba(239, 68, 68, 0.2)';
+            e.target.style.borderColor = 'rgba(239, 68, 68, 1)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.background = 'rgba(239, 68, 68, 0.1)';
+            e.target.style.borderColor = 'rgba(239, 68, 68, 0.8)';
+          }}
         >
           Purge
         </button>
       </div>
 
-      {/* Scrollable Timeline Area */}
+      {/* --- SCROLLABLE LOG CONTENT --- */}
       <div className="custom-scrollbar" style={{ 
         flex: 1, 
         overflowY: 'auto', 
         minHeight: 0,
-        paddingLeft: '6px' // Pushes the circles away from the left panel border
+        paddingLeft: '10px' // Keeps the timeline circles away from the left panel border
       }}>
         {treatedHistory.length === 0 ? (
           <div style={{ display: 'flex', gap: '16px', padding: '10px 0' }}>
@@ -104,7 +114,7 @@ const ShiftReport = ({ socket }) => {
             {treatedHistory.map((record, index) => (
               <div key={index} style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
                 
-                {/* Timeline Circle & Line */}
+                {/* Timeline Visuals */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '12px', flexShrink: 0 }}>
                   <div style={{ 
                     width: '10px', 
@@ -125,13 +135,14 @@ const ShiftReport = ({ socket }) => {
                   )}
                 </div>
 
-                {/* Data Card */}
+                {/* Patient Record Card */}
                 <div style={{ 
                   flex: 1,
                   background: 'rgba(30, 41, 59, 0.5)', 
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   padding: '12px', 
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  marginRight: '6px' // Buffer for scrollbar
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ overflow: 'hidden' }}>
